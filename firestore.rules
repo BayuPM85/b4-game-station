@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function userDoc() { return /databases/$(database)/documents/users/$(request.auth.uid); }
+    function staff() { return signedIn() && exists(userDoc()) && get(userDoc()).data.on != false; }
+    function admin() { return staff() && get(userDoc()).data.role == 'admin'; }
+    function setupDoc() { return /databases/$(database)/documents/meta/setup; }
+
+    // Penanda bahwa Admin pertama sudah dibuat. Dibaca halaman login.
+    match /meta/setup {
+      allow read: if true;
+      allow create: if signedIn() && !exists(setupDoc())
+        && getAfter(userDoc()).data.role == 'admin';
+    }
+    match /meta/{doc} {
+      allow read: if staff();
+      allow write: if admin();
+    }
+
+    match /users/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow read: if staff();
+      // Admin menambah staf. Pengecualian satu kali: Admin pertama saat setup.
+      allow create: if admin()
+        || (signedIn() && request.auth.uid == uid && !exists(setupDoc())
+            && existsAfter(setupDoc()) && request.resource.data.role == 'admin');
+      allow update, delete: if admin();
+    }
+
+    match /settings/{d} { allow read: if staff(); allow write: if admin(); }
+    match /units/{d}    { allow read: if staff(); allow write: if admin(); }
+    match /products/{d} { allow read: if staff(); allow write: if admin(); }
+    match /voids/{d}    { allow read: if staff(); allow write: if admin(); }
+
+    match /stock/{d}  { allow read, write: if staff(); }
+    match /active/{d} { allow read, write: if staff(); }
+
+    // Transaksi tidak bisa diubah atau dihapus. Diskon hanya oleh Admin.
+    match /trx/{d} {
+      allow read: if staff();
+      allow create: if admin()
+        || (staff() && request.resource.data.by == request.auth.uid && request.resource.data.disc == 0);
+      allow update, delete: if false;
+    }
+  }
+}

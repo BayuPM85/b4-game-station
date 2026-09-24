@@ -1,0 +1,15 @@
+# Dependensi
+node_modules/
+
+# Rahasia: jangan pernah di-commit
+service-account*.json
+*.adminsdk*.json
+.env*
+
+# Data usaha (nama pelanggan, transaksi): jangan dipublikasikan
+b4-firebase-export.json
+import-data.json
+
+# Firebase CLI
+.firebase/
+*.log
