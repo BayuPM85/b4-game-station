@@ -43,4 +43,6 @@ Aplikasi mengambil konfigurasi Firebase otomatis dari Firebase Hosting (`/__/fir
 
 ## Lisensi
 
-[MIT](LICENSE)
+Kode: [MIT](LICENSE).
+
+Logo B4 GAME STATION (`public/logo.png`, `public/logo-256.png`, `public/icon-*.png`) adalah milik B4 GAME STATION dan **tidak** termasuk lisensi MIT. Kalau memakai kode ini untuk usaha Anda sendiri, ganti file logo tersebut dengan logo Anda.

@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a0e1c">
 <title>B4 GAME STATION</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 34'%3E%3Crect width='34' height='34' rx='10' fill='%23161d3a'/%3E%3Cpath d='M17 6.5l4 6.8h-8z' fill='none' stroke='%233ec7a4' stroke-width='2.4' stroke-linejoin='round'/%3E%3Ccircle cx='24.5' cy='17' r='3.2' fill='none' stroke='%23ff5a6e' stroke-width='2.4'/%3E%3Cpath d='M14.3 22.3l5.4 5.4m0-5.4l-5.4 5.4' stroke='%236fa8ff' stroke-width='2.4' stroke-linecap='round'/%3E%3Crect x='6.4' y='14' width='6' height='6' fill='none' stroke='%23e28fd4' stroke-width='2.4'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -35,6 +35,8 @@ label{display:block;margin:14px 0 6px;color:var(--mu);font-size:13px;font-weight
 header{position:sticky;top:0;z-index:5;background:#0a0e1ce6;backdrop-filter:blur(10px);border-bottom:1px solid var(--ln)}
 .hbar{max-width:1240px;margin:auto;display:flex;align-items:center;gap:14px;padding:10px 16px}
 .logo{display:flex;align-items:center;gap:10px;margin-right:auto}
+.hlogo{height:46px;width:auto;margin:-4px 0}
+.plogo{display:block;height:clamp(150px,30vw,250px);width:auto;max-width:100%;margin:4px auto 10px;filter:drop-shadow(0 14px 34px #8b55ff40)}
 .logo h1{font-size:19px;letter-spacing:1px;line-height:1.1}.logo h1 span{color:var(--ac2)}
 .who{display:flex;align-items:center;gap:8px;font-size:13px}
 .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--ac),var(--pk));font-weight:700;color:#fff;flex:none}
@@ -203,7 +205,7 @@ td .row-b{display:flex;gap:6px}td .row-b button{min-height:36px;padding:4px 10px
 @media print{body{background:#fff}body>*:not(#m){display:none!important}#m{position:static;background:none;padding:0;display:block!important;backdrop-filter:none}.sheet{border:0;background:none;padding:0;margin:0;max-width:none}.np,.x{display:none!important}#rc{border-radius:0}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
-<header><div class="hbar"><div class="logo"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="10" fill="#161d3a" stroke="#28315a"/><path d="M17 6.5l4 6.8h-8z" fill="none" stroke="#3ec7a4" stroke-width="2" stroke-linejoin="round"/><circle cx="24.5" cy="17" r="3.2" fill="none" stroke="#ff5a6e" stroke-width="2"/><path d="M14.3 22.3l5.4 5.4m0-5.4l-5.4 5.4" stroke="#6fa8ff" stroke-width="2" stroke-linecap="round"/><rect x="6.4" y="14" width="6" height="6" fill="none" stroke="#e28fd4" stroke-width="2"/></svg><h1 id="brand">B4 <span>GAME</span> STATION</h1></div><nav id="nav"></nav><div class="who" id="who"></div></div></header>
+<header><div class="hbar"><div class="logo"><img class="hlogo" src="logo-256.png" alt="" width="46" height="46"><h1 id="brand">B4 <span>GAME</span> STATION</h1></div><nav id="nav"></nav><div class="who" id="who"></div></div></header>
 <main id="app"><p class="mu">Memuat…</p></main>
 <div id="m"><div class="sheet"><button class="x" aria-label="Tutup" onclick="dismiss()">✕</button><div id="mb"></div></div></div><div id="toast" hidden></div>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -574,11 +576,11 @@ async function firstAdmin(){const n=$('#fn').value.trim(),e=$('#fe').value.trim(
  $('#lb').disabled=true;try{const c=await auth.createUserWithEmailAndPassword(e,p),uid=c.user.uid,b=db.batch();
   b.set(db.doc('users/'+uid),{name:n,email:e,role:'admin',on:true});b.set(db.doc('meta/setup'),{done:true,uid,at:Date.now()});await b.commit()}catch(x){er.textContent=aErr(x);$('#lb').disabled=false}}
 function logout(){unData.forEach(f=>f());unData=[];close();auth.signOut()}
-const hero=()=>`<div class="lart">${padArt('Nintendo Switch')}${padArt('PS5')}${padArt('Xbox')}</div>`;
+const hero=()=>`<img class="plogo" src="logo.png" alt="B4 Game Station">`;
 function vLogin(){if($('#le')||$('#fn'))return;const a=$('#app');
  if(!S.setupKnown){a.innerHTML='<p class="mu">Memuat…</p>';return}
  if(!S.setup){a.innerHTML=`<div class="login">${hero()}<h2>Selamat datang!</h2><p>Buat akun Admin untuk pemilik. Kasir ditambahkan nanti di Pengaturan.</p><div class="card"><label for="fn" style="margin-top:0">Nama</label><input id="fn" placeholder="Nama pemilik" autocomplete="name"><label for="fe">Email</label><input id="fe" type="email" placeholder="nama@gmail.com" autocomplete="email"><label for="f1">Kata sandi (min. 6 karakter)</label><input id="f1" type="password" autocomplete="new-password"><label for="f2">Ulangi kata sandi</label><input id="f2" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')firstAdmin()"><p class="err" id="lerr" role="alert"></p><button class="p" id="lb" style="width:100%;margin-top:12px" onclick="firstAdmin()">Buat akun Admin</button></div></div>`;return}
- a.innerHTML=`<div id="pubst"></div><div class="divider">Khusus staf</div><div class="login" style="margin-top:10px"><h2>Masuk</h2><p>Masuk dengan email dan kata sandi akun staf.</p><div class="card"><label for="le" style="margin-top:0">Email</label><input id="le" type="email" autocomplete="username" placeholder="nama@gmail.com"><label for="lp">Kata sandi</label><input id="lp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"><p class="err" id="lerr" role="alert"></p><button class="p" id="lb" style="width:100%;margin-top:12px" onclick="login()">Masuk</button><div style="text-align:center;margin-top:8px"><button class="link" onclick="resetPw()">Lupa kata sandi?</button></div></div></div>`;pubRender()}
+ a.innerHTML=`${hero()}<div id="pubst"></div><div class="divider">Khusus staf</div><div class="login" style="margin-top:10px"><h2>Masuk</h2><p>Masuk dengan email dan kata sandi akun staf.</p><div class="card"><label for="le" style="margin-top:0">Email</label><input id="le" type="email" autocomplete="username" placeholder="nama@gmail.com"><label for="lp">Kata sandi</label><input id="lp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"><p class="err" id="lerr" role="alert"></p><button class="p" id="lb" style="width:100%;margin-top:12px" onclick="login()">Masuk</button><div style="text-align:center;margin-top:8px"><button class="link" onclick="resetPw()">Lupa kata sandi?</button></div></div></div>`;pubRender()}
 function vNoAccess(){const a=$('#app');if(!S.meReady){a.innerHTML='<p class="mu">Memeriksa akun…</p>';return}
  a.innerHTML=`<div class="login">${hero()}<h2>Akun belum terdaftar</h2><p>${esc(authUser.email)} belum terdaftar sebagai staf aktif. Minta Admin menambahkan email ini di Pengaturan → Akun staf.</p><button onclick="logout()">Keluar</button></div>`}
 const nAdm=ex=>S.users.filter(x=>x.role==='admin'&&x.on!==false&&x.id!==ex).length;
