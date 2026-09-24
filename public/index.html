@@ -212,7 +212,8 @@ function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeou
 function beep(n){try{ctx.resume();for(let i=0;i<n;i++){const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.value=.15;o.start(ctx.currentTime+i*.35);o.stop(ctx.currentTime+i*.35+.2)}}catch(e){}}
 const cfg=()=>S.cfg||DEF,rate=u=>u.rate>0?u.rate:(cfg().rates[u.type]||0);
 const end=s=>s.start+(s.paidMin+s.bonusMin+(s.redeemMin||0)+(s.ext||[]).reduce((a,e)=>a+e.min,0))*6e4;
-const rent=(s,t)=>{if(s.mode==='bebas'){const r=s.round||1;let m=Math.ceil((t-s.start)/6e4/r)*r;if(m<r)m=r;return Math.round(s.rate*m/60)}return s.price+(s.ext||[]).reduce((a,e)=>a+e.cost,0)};
+const bebasMin=(s,t)=>{const r=s.round||1,m=Math.ceil((t-s.start)/6e4/r)*r;return m<r?r:m};
+const rent=(s,t)=>{if(s.mode==='bebas'){const m=bebasMin(s,t),rd=s.redeemMin||0;return Math.round(s.rate*(rd?Math.max(s.redeemFloor||0,m-rd):m)/60)}return s.price+(s.ext||[]).reduce((a,e)=>a+e.cost,0)};
 const prodSum=s=>(s.items||[]).reduce((a,i)=>a+i.p*i.q,0);
 const pct=(s,t)=>Math.min(100,Math.max(0,(t-s.start)/Math.max(1,end(s)-s.start)*100));
 function status(u){const s=S.act[u.id];if(u.maint)return'maint';if(!s)return'free';if(s.awaiting)return'pay';return s.mode!=='bebas'&&Date.now()>=end(s)?'over':'play'}
@@ -286,7 +287,7 @@ function card(u){
  const st=status(u),s=S.act[u.id],t=Date.now();let b='',body='';
  if(st==='maint')b=`<p class="idle">Unit sedang dalam perawatan.</p>`;
  else if(st==='free')b=`<button class="p full" onclick="startM('${u.id}')">${IC.play}Mulai Rental</button>`;
- else if(s)b=(s.mode!=='bebas'?`<button onclick="extM('${u.id}')">${IC.clock}Waktu</button>`:'')+`<button onclick="ordM('${u.id}')">${IC.bag}Pesanan</button><button class="g full" onclick="coM('${u.id}')">${IC.pay}Checkout</button>`;
+ else if(s)b=(s.mode!=='bebas'?`<button onclick="extM('${u.id}')">${IC.clock}Waktu</button>`:'')+`<button onclick="ordM('${u.id}')">${IC.bag}Pesanan</button><button class="${s.mode!=='bebas'?'full':''}" onclick="redeemM('${u.id}')">${IC.clock}Ambil Bonus</button><button class="g full" onclick="coM('${u.id}')">${IC.pay}Checkout</button>`;
  if(s){const bb=s.mode==='bebas';body=`<div><div class="tml">${bb?'Sudah main':st==='over'?'Waktu habis':'Sisa waktu'}</div><div class="tm" data-u="${u.id}">${bb?clock(t-s.start):clock(end(s)-t)}</div></div>${bb?'':`<div class="bar"><i data-b="${u.id}" style="width:${pct(s,t)}%"></i></div>`}
  <div class="meta"><span>Pelanggan</span><b>${esc(s.cust||'Tanpa nama')}</b><span>Paket</span><b>${esc(s.label)}</b>${s.keep?`<span>Bonus</span><b>${jm(s.earnMin)} disimpan</b>`:''}${s.redeemMin?`<span>Simpanan</span><b>+${jm(s.redeemMin)}</b>`:''}<span>Mulai</span><b>${hm(s.start)}</b>${bb?'':`<span>Selesai</span><b>${hm(end(s))}</b>`}</div>
  <div class="bill-est"><span>Estimasi tagihan</span><b>${rp(rent(s,t)+prodSum(s))}</b></div>`}
@@ -372,6 +373,30 @@ async function doStart(id){if(busy)return;const er=$('#serr');er.textContent='';
    else if(mref&&cu&&md.name!==cu)tx.set(mref,{name:cu,phone:p,at:st},{merge:true});
    tx.set(ref,{...pl,redeemAt,unit:id,unitName:u.name,type:u.type,rate:rate(u),round:cfg().round,cust:cu||md.name||'',phone:p,start:st,items:[],ext:[],by:me})});
   close();toast('Rental dimulai · '+u.name)}catch(e){dbErr(e);const g=$('#go');if(g)g.disabled=false}busy=false}
+function redeemCap(s,p,t){const full=s.mode==='bebas'?(t-s.start)/6e4>=60:(s.paidMin||0)+(s.ext||[]).reduce((a,e)=>a+e.min,0)>=60;return{full,max:full?bal(p):balToday(p)}}
+function redeemM(id){const s=S.act[id],u=S.units.find(x=>x.id===id);
+ if(wkend(Date.now()))return toast('Sabtu–Minggu bonus simpanan tidak bisa diambil.');
+ open(`<div class="mhead">${padArt(u.type)}<div><h3>Ambil Bonus</h3><div class="mu">${esc(u.name)} · ${esc(s.label)}</div></div></div>
+ <label for="rp">No. HP pelanggan</label><input id="rp" type="tel" inputmode="tel" placeholder="08xxxxxxxxxx" value="${esc(s.phone||'')}" oninput="redeemV('${id}')">
+ <div class="preview" id="rinfo"></div><div id="rsel"><label for="ra">Jumlah yang diambil</label><select id="ra"></select>
+ <p class="mu" style="margin:6px 0 0">${s.mode==='bebas'?'Main bebas: jam bonus memotong tagihan, bayar minimal sampai saat bonus diambil.':'Jam bonus ditambahkan ke sisa waktu main.'}</p></div>
+ <p class="err" id="rerr" role="alert"></p><div class="foot"><button onclick="close()">Batal</button><button class="p" id="rb" onclick="doRedeem('${id}')">${IC.clock}Ambil Bonus</button></div>`);redeemV(id)}
+function redeemV(id){const s=S.act[id],p=hp($('#rp').value),t=Date.now(),{full,max}=redeemCap(s,p,t),b=bal(p),m=S.members[p]||{};
+ $('#rinfo').innerHTML=!p?'<div class="mu">Masukkan No. HP untuk melihat saldo bonus.</div>':!b?`<div class="mu">${m.name?esc(m.name)+' · ':''}Tidak ada saldo bonus aktif.</div>`
+  :`<div class="mu">${esc(m.name||p)} · saldo bonus</div><div class="pr">${jm(b)}</div><p>${full?'Syarat main minimal 1 jam terpenuhi, semua saldo bisa diambil.':`Belum main 1 jam${s.mode==='bebas'?' (baru '+jm((t-s.start)/6e4)+')':''}. Sekarang hanya bonus yang disimpan hari ini (${jm(balToday(p))}) yang bisa diambil.`}</p>`;
+ const o=[];for(let x=30;x<max;x+=30)o.push(x);if(max>0)o.push(max);
+ $('#ra').innerHTML=o.map(x=>`<option value="${x}">${x===max?'Semua · ':''}${jm(x)}</option>`).join('');$('#rsel').hidden=!max;$('#rb').disabled=!max}
+async function doRedeem(id){if(busy)return;const p=hp($('#rp').value),x=+$('#ra').value||0,er=$('#rerr');er.textContent='';
+ if(wkend(Date.now()))return er.textContent='Sabtu–Minggu bonus simpanan tidak bisa diambil.';if(!p||!x)return;
+ busy=true;$('#rb').disabled=true;
+ try{const now=Date.now(),ref=db.doc('active/'+id),mref=db.doc('members/'+p);
+  await db.runTransaction(async tx=>{const a=await tx.get(ref),m=await tx.get(mref);if(!a.exists)throw{message:'Sesi ini sudah selesai.'};
+   const s=a.data(),md=m.exists?m.data():{},{full}=redeemCap(s,p,now),k=takeLots(md.lots,x,now,!full);
+   if(!k)throw{message:'Saldo bonus tidak cukup atau belum memenuhi syarat main 1 jam.'};
+   tx.set(mref,{lots:k.rest,bonusMin:sumL(k.rest),at:now},{merge:true});tx.set(db.collection('bonuslog').doc(),{phone:p,min:-x,type:'pakai',unit:s.unitName,at:now,by:me});
+   const up={redeemMin:(s.redeemMin||0)+x,redeemAt:s.redeemAt?Math.min(s.redeemAt,k.first):k.first,phone:p};if(!s.cust&&md.name)up.cust=md.name;
+   if(s.mode==='bebas'&&!s.redeemMin)up.redeemFloor=bebasMin(s,now);tx.update(ref,up)});
+  close();toast('Bonus '+jm(x)+' ditambahkan')}catch(e){dbErr(e);const b=$('#rb');if(b)b.disabled=false}busy=false}
 function extM(id){const u=S.units.find(x=>x.id===id);open(`<div class="mhead">${padArt(u.type)}<div><h3>Tambah Waktu</h3><div class="mu">${esc(u.name)} · tarif reguler ${rp(rate(u))}/jam, tanpa bonus</div></div></div>
  <label for="eh">Tambahan</label><div class="step"><button type="button" aria-label="Kurangi" onclick="stepH('eh',-1)">−</button><input id="eh" type="number" min="1" value="1" inputmode="numeric" oninput="$('#ec').textContent=rp(rate(S.units.find(x=>x.id==='${id}'))*(+this.value||0))"><span>jam</span><button type="button" aria-label="Tambah" onclick="stepH('eh',1)">+</button></div>
  <div class="preview"><div class="mu">Biaya tambahan</div><div class="pr" id="ec">${rp(rate(u))}</div></div><div class="foot"><button onclick="close()">Batal</button><button class="p" onclick="doExt('${id}')">${IC.clock}Tambah Waktu</button></div>`)}
@@ -396,13 +421,15 @@ function coSolo(){const items=Object.entries(cart).map(([pid,q])=>{const p=S.pro
 async function coM(id){try{await db.doc('active/'+id).update({awaiting:true})}catch(e){}checkout(S.act[id])}
 async function cancelCo(id){try{if(id)await db.doc('active/'+id).update({awaiting:false})}catch(e){}close()}
 const meVal=()=>(document.querySelector('input[name=me]:checked')||{}).value||'Tunai';
-function bonusOut(s,t){if(!s.unit||s.mode!=='paket')return{save:0,earn:0,back:0,lost:0};
- let R=Math.max(0,Math.floor((end(s)-t)/6e4));const ur=Math.min(s.redeemMin||0,R);R-=ur;const ub=Math.min(s.bonusMin||0,R),kept=s.keep?(s.earnMin||0):0;
+function bonusOut(s,t){if(!s.unit||!['paket','bebas'].includes(s.mode))return{save:0,earn:0,back:0,lost:0};
+ let ur=0,ub=0,kept=0;
+ if(s.mode==='bebas')ur=s.redeemMin?Math.max(0,s.redeemMin-Math.max(0,bebasMin(s,t)-(s.redeemFloor||0))):0;
+ else{let R=Math.max(0,Math.floor((end(s)-t)/6e4));ur=Math.min(s.redeemMin||0,R);R-=ur;ub=Math.min(s.bonusMin||0,R);kept=s.keep?(s.earnMin||0):0}
  if(wkend(s.start))return{save:0,earn:0,back:0,lost:ub+ur};
  return{save:kept+ub+ur,earn:kept+ub,back:ur,lost:0}}
 function checkout(s){const t=Date.now(),r=s.mode==='jual'?0:rent(s,t),pr=prodSum(s),u=s.unit,bo=bonusOut(s,t);
  window._co={s,r,pr,bo};coCalc.k=null;
- const lines=(s.mode==='jual'?'':`<div class="bl"><span><b>${esc(s.unitName)}</b> · ${esc(s.type)}</span><b>${rp(r)}</b></div><div class="sub">${esc(s.label)}${s.mode==='bebas'?' · '+Math.ceil((t-s.start)/6e4)+' menit dipakai':' · bayar '+jm(s.paidMin)+(s.bonusMin?', bonus '+jm(s.bonusMin):'')+(s.redeemMin?', simpanan '+jm(s.redeemMin):'')}${(s.ext||[]).length?' · perpanjangan '+jm(s.ext.reduce((a,e)=>a+e.min,0)):''}</div>`)
+ const lines=(s.mode==='jual'?'':`<div class="bl"><span><b>${esc(s.unitName)}</b> · ${esc(s.type)}</span><b>${rp(r)}</b></div><div class="sub">${esc(s.label)}${s.mode==='bebas'?' · '+Math.ceil((t-s.start)/6e4)+' menit dipakai'+(s.redeemMin?', dipotong bonus simpanan '+jm(s.redeemMin):''):' · bayar '+jm(s.paidMin)+(s.bonusMin?', bonus '+jm(s.bonusMin):'')+(s.redeemMin?', simpanan '+jm(s.redeemMin):'')}${(s.ext||[]).length?' · perpanjangan '+jm(s.ext.reduce((a,e)=>a+e.min,0)):''}</div>`)
  +((s.items||[]).length?(s.mode==='jual'?'':'<hr>')+(s.items||[]).map(i=>`<div class="bl"><span>${esc(i.n)} ×${i.q}</span><span>${rp(i.p*i.q)}</span></div>`).join(''):'');
  const bw=bo.save?`<div class="preview" style="margin-top:12px"><div class="mu">Bonus disimpan ke saldo · berlaku ${BDAYS} hari</div><div class="pr">${jm(bo.save)}</div>${s.phone?`<p>Atas nama ${esc(s.cust||s.phone)} · ${esc(s.phone)}${S.members[s.phone]?' · saldo sekarang '+jm(bal(s.phone)):''}</p>`:`<label for="bp" style="color:#c5cdf0">No. HP pelanggan (wajib agar bonus tersimpan)</label><input id="bp" type="tel" inputmode="tel" placeholder="08xxxxxxxxxx">`}</div>`
   :bo.lost?`<p class="note">Sisa bonus ${jm(bo.lost)} hangus (Sabtu–Minggu bonus harus langsung dipakai).</p>`:'';
@@ -439,7 +466,7 @@ async function doPay(){if(busy)return;const {s,r,pr,bo}=window._co,er=$('#perr')
 /* ---------- struk ---------- */
 function receipt(t){const c=cfg(),R=(a,b)=>`<div class="r"><span>${a}</span><span>${b}</span></div>`;
  open(`<h3 class="np">Struk</h3><div style="margin-top:12px"><div id="rc" class="${c.paper==='58'?'w58':''}"><div style="text-align:center"><b>${esc(c.name)}</b><br>${esc(c.addr)}<br>${esc(c.tel)}</div><hr>${R('No',esc(t.no))}${R('Tgl',dtm(t.at))}${R('Kasir',esc(S.names[t.by]||'Kasir'))}${t.cust?R('Pelanggan',esc(t.cust)):''}
- ${t.unit?R('Unit',esc(t.unitName+' ('+t.type+')'))+R('Paket',esc(t.label))+(t.mode==='bebas'?'':R('Durasi bayar',jm(t.paidMin))+(t.bonusMin?R('Bonus dipakai',jm(t.bonusMin)):'')+(t.redeemMin?R('Bonus simpanan',jm(t.redeemMin)):'')+(t.extMin?R('Perpanjangan',jm(t.extMin)):''))+R('Rental',rp(t.rental)):''}
+ ${t.unit?R('Unit',esc(t.unitName+' ('+t.type+')'))+R('Paket',esc(t.label))+(t.mode==='bebas'?(t.redeemMin?R('Bonus simpanan',jm(t.redeemMin)):''):R('Durasi bayar',jm(t.paidMin))+(t.bonusMin?R('Bonus dipakai',jm(t.bonusMin)):'')+(t.redeemMin?R('Bonus simpanan',jm(t.redeemMin)):'')+(t.extMin?R('Perpanjangan',jm(t.extMin)):''))+R('Rental',rp(t.rental)):''}
  ${t.items.length?'<hr>'+t.items.map(i=>R(esc(i.n)+' x'+i.q,rp(i.p*i.q))).join(''):''}<hr>${R('Diskon',rp(t.disc))}${R('<b>TOTAL</b>','<b>'+rp(t.total)+'</b>')}${R('Metode',t.method)}${t.method==='Tunai'?R('Diterima',rp(t.cash))+R('Kembali',rp(t.change)):''}
  ${t.savedMin?'<hr>'+R('Bonus disimpan',jm(t.savedMin))+(t.expAt?R('Berlaku s.d.',dtm(t.expAt)):'')+(t.balAfter!=null?R('Saldo bonus',jm(t.balAfter)):'')+R('HP',esc(t.phone)):''}${t.lostMin?'<hr>'+R('Bonus hangus',jm(t.lostMin)):''}
  <hr><div style="text-align:center">${esc(c.foot)}</div></div></div>
