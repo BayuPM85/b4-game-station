@@ -175,6 +175,20 @@ td .row-b{display:flex;gap:6px}td .row-b button{min-height:36px;padding:4px 10px
 .lrow:last-of-type{border-bottom:0}.lrow svg.cart{width:52px;flex:none}.lrow span{flex:1;min-width:0;overflow-wrap:anywhere}
 .hrow{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
 .login{max-width:440px;margin:24px auto 0;text-align:center}
+.pub{max-width:960px;margin:8px auto 26px}
+.pubh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.pubh h2{font-size:26px}
+.stale{color:var(--wr)}
+.ptypes{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px}
+.ptype{display:flex;align-items:center;gap:10px;background:var(--cd);border:1px solid var(--ln);border-radius:14px;padding:10px 12px}
+.ptype svg{width:58px;flex:none}.ptype b{display:block;font:700 16px var(--fd)}.ptype span{font-size:13px;color:var(--mu)}.ptype span em{font-style:normal;color:var(--ok);font-weight:600}
+.pgrid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.uc{border-radius:12px;padding:8px 10px;border:1px solid var(--ln);background:var(--cd);display:flex;flex-direction:column;gap:1px}
+.uc b{font:700 18px/1.1 var(--fd)}.uc small{color:var(--mu);font-size:11.5px}.uc i{font-style:normal;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:4px}
+.uc.free{border-color:#1f5a4a;background:#0e2a24}.uc.free i{color:var(--ok)}
+.uc.busy{border-color:#2d4ea8;background:#141f47}.uc.busy i{color:var(--ac2)}
+.uc.maint{opacity:.6}.uc.maint i{color:var(--mu)}
+.divider{display:flex;align-items:center;gap:12px;max-width:440px;margin:0 auto 4px;color:var(--mu);font-size:13px}.divider::before,.divider::after{content:"";flex:1;border-top:1px solid var(--ln)}
 .lart{display:flex;justify-content:center;align-items:flex-end;margin-bottom:6px}
 .lart svg{width:120px}.lart svg:nth-child(1){transform:rotate(-12deg) translateX(14px)}.lart svg:nth-child(3){transform:rotate(12deg) translateX(-14px)}.lart svg:nth-child(2){width:140px;position:relative;z-index:1}
 .login h2{font-size:28px}.login>p{color:var(--mu);margin:4px 0 16px}
@@ -262,6 +276,7 @@ const empty=(m,art)=>`<div class="empty">${art||padArt('PS4')}<div>${m}</div></d
 function render(){
  $('#brand').innerHTML=cur&&S.cfg&&S.cfg.name&&S.cfg.name!=='B4 GAME STATION'?esc(S.cfg.name):'B4 <span>GAME</span> STATION';
  if(!cur){$('#nav').innerHTML='';$('#who').innerHTML=authUser?`<button class="ghost" onclick="logout()" style="min-height:38px;padding:6px 12px">Keluar</button>`:'';return authUser?vNoAccess():vLogin()}
+ pubSync();
  $('#nav').innerHTML=Object.keys(NAVL).filter(t=>t!=='Pengaturan'||admin).map(t=>`<button class="${t===tab?'on':''}" onclick="tab='${t}';render()" aria-current="${t===tab?'page':'false'}">${IC[t]}${NAVL[t]}</button>`).join('');
  $('#who').innerHTML=`<div class="av">${esc((cur.name||'?')[0].toUpperCase())}</div><div class="nm">${esc(cur.name)}<div class="role">${admin?'Admin':'Kasir'}</div></div><button class="ghost" onclick="logout()" style="min-height:38px;padding:6px 12px">Keluar</button>`;
  const a=$('#app');
@@ -296,6 +311,7 @@ function card(u){
  <div class="ub"><div class="uh"><h3>${esc(u.name)}</h3><span class="rate">${rp(rate(u))}/jam</span></div>${body}<div class="acts">${b}</div></div></article>`;
 }
 function tick(){
+ if(!cur&&Date.now()-(tick.pr||0)>3e4){tick.pr=Date.now();pubRender()}
  const t=Date.now(),L=(cfg().lock??10)*6e4;if(cur&&L&&t-idle>L){logout();toast('Terkunci otomatis karena tidak dipakai');return}
  if(cur&&tab==='Dashboard'&&S.cfg){const sig=S.units.map(status).join();if(sig!==tick.sig){tick.sig=sig;if($('#m').style.display!=='flex')render()}
   document.querySelectorAll('[data-u]').forEach(e=>{const s=S.act[e.dataset.u];if(s)e.textContent=s.mode==='bebas'?clock(t-s.start):clock(end(s)-t)});
@@ -533,6 +549,18 @@ async function importData(){const f=$('#imf')&&$('#imf').files[0];if(!f)return t
   for(let i=0;i<ops.length;i+=400){const b=db.batch();ops.slice(i,i+400).forEach(([c,id,d])=>b.set(db.doc(c+'/'+id),d));await b.commit()}
   toast(ops.length+' data berhasil diimpor');const e=$('#imf');if(e)e.value=''}catch(e){dbErr(e)}busy=false}
 
+/* ---------- status publik ---------- */
+// Ringkasan unit tanpa data pelanggan, ditulis oleh perangkat staf dan bisa dibaca siapa pun.
+function pubSnap(){return{name:cfg().name||'B4 GAME STATION',units:S.units.map(u=>{const st=status(u),s=S.act[u.id];return{n:u.name,t:u.type,s:st==='free'?'free':st==='maint'?'maint':'busy',e:s&&s.mode!=='bebas'&&!s.awaiting?end(s):null}})}}
+let pubLast='';
+function pubSync(){if(!cur||!S.cfgReady||!S.cfg)return;const o=pubSnap(),k=JSON.stringify(o);if(k===pubLast)return;pubLast=k;
+ clearTimeout(pubSync.h);pubSync.h=setTimeout(()=>db.doc('public/status').set({...o,at:Date.now()}).catch(()=>{pubLast=''}),1200)}
+function pubRender(){const e=$('#pubst');if(!e)return;const p=S.pub;if(!p||!p.units||!p.units.length){e.innerHTML='';return}
+ const c={free:0,busy:0,maint:0},now=Date.now();p.units.forEach(u=>c[u.s]=(c[u.s]||0)+1);const types=[...new Set(p.units.map(u=>u.t))];
+ e.innerHTML=`<section class="pub" aria-label="Status unit"><div class="pubh"><h2>Status unit sekarang</h2><span class="mu ${now-p.at>36e5?'stale':''}">Diperbarui ${now-p.at>864e5?dtm(p.at):hm(p.at)+' WIB'}${now-p.at>36e5?' · mungkin belum terbaru':''}</span></div>
+ <div class="sum"><div class="tile"><div class="ic" style="background:#0f3a2f;color:var(--ok)">${shp('free',20)}</div><div><b>${c.free}</b><span>Unit kosong</span></div></div><div class="tile"><div class="ic" style="background:#16275a;color:var(--ac2)">${shp('play',20)}</div><div><b>${c.busy}</b><span>Unit tersewa</span></div></div>${c.maint?`<div class="tile"><div class="ic" style="background:#232a45;color:var(--mu)">${shp('maint',20)}</div><div><b>${c.maint}</b><span>Perawatan</span></div></div>`:''}</div>
+ <div class="ptypes">${types.map(t=>{const l=p.units.filter(u=>u.t===t),f=l.filter(u=>u.s==='free').length;return `<div class="ptype">${padArt(t)}<div><b>${esc(t)}</b><span><em>${f} kosong</em> dari ${l.length}</span></div></div>`}).join('')}</div>
+ <div class="pgrid2">${p.units.map(u=>`<div class="uc ${u.s}"><b>${esc(String(u.n).replace(/^Unit\s*/i,''))}</b><small>${esc(u.t)}</small><i>${shp(u.s==='busy'?'play':u.s,11)}${u.s==='free'?'Kosong':u.s==='maint'?'Perawatan':u.e&&u.e>now?'s/d '+hm(u.e):'Tersewa'}</i></div>`).join('')}</div></section>`}
 /* ---------- akun ---------- */
 async function login(){const e=$('#le').value.trim(),p=$('#lp').value,er=$('#lerr');er.textContent='';if(!e||!p){er.textContent='Isi email dan kata sandi.';return}
  $('#lb').disabled=true;try{await auth.signInWithEmailAndPassword(e,p)}catch(x){er.textContent=aErr(x);$('#lb').disabled=false}}
@@ -547,7 +575,7 @@ const hero=()=>`<div class="lart">${padArt('Nintendo Switch')}${padArt('PS5')}${
 function vLogin(){if($('#le')||$('#fn'))return;const a=$('#app');
  if(!S.setupKnown){a.innerHTML='<p class="mu">Memuat…</p>';return}
  if(!S.setup){a.innerHTML=`<div class="login">${hero()}<h2>Selamat datang!</h2><p>Buat akun Admin untuk pemilik. Kasir ditambahkan nanti di Pengaturan.</p><div class="card"><label for="fn" style="margin-top:0">Nama</label><input id="fn" placeholder="Nama pemilik" autocomplete="name"><label for="fe">Email</label><input id="fe" type="email" placeholder="nama@gmail.com" autocomplete="email"><label for="f1">Kata sandi (min. 6 karakter)</label><input id="f1" type="password" autocomplete="new-password"><label for="f2">Ulangi kata sandi</label><input id="f2" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')firstAdmin()"><p class="err" id="lerr" role="alert"></p><button class="p" id="lb" style="width:100%;margin-top:12px" onclick="firstAdmin()">Buat akun Admin</button></div></div>`;return}
- a.innerHTML=`<div class="login">${hero()}<h2>Siap main?</h2><p>Masuk dengan email dan kata sandi akun staf.</p><div class="card"><label for="le" style="margin-top:0">Email</label><input id="le" type="email" autocomplete="username" placeholder="nama@gmail.com"><label for="lp">Kata sandi</label><input id="lp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"><p class="err" id="lerr" role="alert"></p><button class="p" id="lb" style="width:100%;margin-top:12px" onclick="login()">Masuk</button><div style="text-align:center;margin-top:8px"><button class="link" onclick="resetPw()">Lupa kata sandi?</button></div></div></div>`}
+ a.innerHTML=`<div id="pubst"></div><div class="divider">Khusus staf</div><div class="login" style="margin-top:10px"><h2>Masuk</h2><p>Masuk dengan email dan kata sandi akun staf.</p><div class="card"><label for="le" style="margin-top:0">Email</label><input id="le" type="email" autocomplete="username" placeholder="nama@gmail.com"><label for="lp">Kata sandi</label><input id="lp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"><p class="err" id="lerr" role="alert"></p><button class="p" id="lb" style="width:100%;margin-top:12px" onclick="login()">Masuk</button><div style="text-align:center;margin-top:8px"><button class="link" onclick="resetPw()">Lupa kata sandi?</button></div></div></div>`;pubRender()}
 function vNoAccess(){const a=$('#app');if(!S.meReady){a.innerHTML='<p class="mu">Memeriksa akun…</p>';return}
  a.innerHTML=`<div class="login">${hero()}<h2>Akun belum terdaftar</h2><p>${esc(authUser.email)} belum terdaftar sebagai staf aktif. Minta Admin menambahkan email ini di Pengaturan → Akun staf.</p><button onclick="logout()">Keluar</button></div>`}
 const nAdm=ex=>S.users.filter(x=>x.role==='admin'&&x.on!==false&&x.id!==ex).length;
@@ -587,6 +615,7 @@ function names(){S.names={...S.legacy};S.users.forEach(u=>S.names[u.id]=u.name)}
  try{fbCfg=await (await fetch('/__/firebase/init.json')).json();firebase.initializeApp(fbCfg)}
  catch(e){$('#app').innerHTML='<div class="card">Konfigurasi Firebase tidak ditemukan. Halaman ini harus dibuka dari Firebase Hosting (alamat .web.app).</div>';return}
  auth=firebase.auth();db=firebase.firestore();
+ db.doc('public/status').onSnapshot(s=>{S.pub=s.exists?s.data():null;pubRender()},()=>{});
  db.doc('meta/setup').onSnapshot(s=>{S.setup=s.exists;S.setupKnown=true;if(!authUser)render()},()=>{S.setupKnown=true;S.setup=true;render()});
  auth.onAuthStateChanged(u=>{authUser=u;if(unMe){unMe();unMe=null}unData.forEach(f=>f());unData=[];cur=null;admin=false;me='';S.meReady=false;S.cfgReady=false;tab='Dashboard';
   if(!u){render();return}

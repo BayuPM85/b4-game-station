@@ -28,6 +28,9 @@ service cloud.firestore {
       allow update, delete: if admin();
     }
 
+    // Ringkasan status unit untuk halaman depan: tanpa data pelanggan, bisa dibaca siapa pun.
+    match /public/{d} { allow read: if true; allow write: if staff(); }
+
     match /settings/{d} { allow read: if staff(); allow write: if admin(); }
     match /units/{d}    { allow read: if staff(); allow write: if admin(); }
     match /products/{d} { allow read: if staff(); allow write: if admin(); }
