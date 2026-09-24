@@ -34,6 +34,10 @@ service cloud.firestore {
     match /voids/{d}    { allow read: if staff(); allow write: if admin(); }
 
     match /stock/{d}  { allow read, write: if staff(); }
+
+    // Saldo bonus pelanggan (per No. HP) dan riwayatnya.
+    match /members/{p} { allow read, create, update: if staff(); allow delete: if admin(); }
+    match /bonuslog/{d} { allow read, create: if staff(); allow update, delete: if false; }
     match /active/{d} { allow read, write: if staff(); }
 
     // Transaksi tidak bisa diubah atau dihapus. Diskon hanya oleh Admin.
