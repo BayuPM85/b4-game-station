@@ -45,6 +45,16 @@ service cloud.firestore {
     match /bonuslog/{d} { allow read, create: if staff(); allow update, delete: if false; }
     match /active/{d} { allow read, write: if staff(); }
 
+    // Pengeluaran harian: staf mencatat atas namanya sendiri; Admin atau pencatatnya boleh mengubah/menghapus.
+    match /expenses/{d} {
+      allow read: if staff();
+      allow create: if staff() && request.resource.data.by == request.auth.uid
+        && request.resource.data.amount is number && request.resource.data.amount > 0;
+      allow update: if admin() || (staff() && resource.data.by == request.auth.uid
+        && request.resource.data.by == request.auth.uid && request.resource.data.amount is number && request.resource.data.amount > 0);
+      allow delete: if admin() || (staff() && resource.data.by == request.auth.uid);
+    }
+
     // Transaksi tidak bisa diubah atau dihapus. Diskon hanya oleh Admin.
     match /trx/{d} {
       allow read: if staff();
