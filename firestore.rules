@@ -29,7 +29,9 @@ service cloud.firestore {
     }
 
     // Ringkasan status unit untuk halaman depan: tanpa data pelanggan, bisa dibaca siapa pun.
-    match /public/{d} { allow read: if true; allow write: if staff(); }
+    match /public/status { allow read: if true; allow write: if staff(); }
+    // Promo dan kontak halaman depan: hanya Admin yang mengubah.
+    match /public/site { allow read: if true; allow write: if admin(); }
 
     match /settings/{d} { allow read: if staff(); allow write: if admin(); }
     match /units/{d}    { allow read: if staff(); allow write: if admin(); }
