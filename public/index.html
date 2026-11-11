@@ -380,9 +380,28 @@ nav a.on{color:#fff;background:#8b5cf61f;border-color:#8b5cf666;box-shadow:inset
 :root[data-theme="light"] .fab{box-shadow:0 8px 20px rgb(16 24 40/.18)}
 :root[data-theme="light"] .setp{background:#fff;border-color:#e6defe}
 :root[data-theme="light"] #toast{box-shadow:0 10px 30px rgb(16 24 40/.2)}
+/* ---------- LED latar (garis & bentuk acak) ---------- */
+#leds{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict}
+main{position:relative;z-index:1}
+.led{position:absolute;--o:.55;--g:10px;opacity:var(--o);animation:ledpulse var(--d,6s) ease-in-out var(--dl,0s) infinite alternate;will-change:opacity}
+.led.ln{height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--c) 18%,var(--c) 82%,transparent);box-shadow:0 0 var(--g) var(--c)}
+.led.ln.v{width:2px;background:linear-gradient(180deg,transparent,var(--c) 18%,var(--c) 82%,transparent)}
+.led.rg{border-radius:50%;border:2px solid var(--c);box-shadow:0 0 var(--g) var(--c),inset 0 0 var(--g) var(--c)}
+.led.sq{border:2px solid var(--c);border-radius:6px;box-shadow:0 0 var(--g) var(--c),inset 0 0 calc(var(--g)*.6) var(--c)}
+.led.tr{filter:drop-shadow(0 0 calc(var(--g)*.5) var(--c))}.led.tr path{fill:none;stroke:var(--c);stroke-width:2.2;stroke-linejoin:round}
+.led.dt{width:6px;height:6px;border-radius:50%;background:var(--c);box-shadow:0 0 var(--g) var(--c),0 0 calc(var(--g)*2) var(--c)}
+.led.run::after{content:"";position:absolute;top:-2px;left:0;width:22%;height:6px;border-radius:6px;background:#fff;filter:blur(2px);opacity:.75;animation:ledrun var(--rd,7s) linear var(--dl,0s) infinite}
+@keyframes ledpulse{from{opacity:calc(var(--o)*.35)}to{opacity:var(--o)}}
+@keyframes ledrun{from{transform:translateX(-30%)}to{transform:translateX(480%)}}
+:root[data-theme="light"] .led{--o:.5;--g:8px}
+:root[data-theme="light"] .led.run::after{opacity:.5}
+@media (max-width:720px){.led{--o:.45}:root[data-theme="light"] .led{--o:.38}}
+@media (prefers-reduced-motion:reduce){.led,.led.run::after{animation:none!important}.led.run::after{display:none}}
+@media print{#leds{display:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}.anim .rv{opacity:1!important;transform:none!important}}
 </style></head><body>
 <header><div class="hbar"><div class="logo"><img class="hlogo" src="logo-light-256.png" alt="" width="46" height="46"><h1 id="brand">B4 <span>GAME</span> STATION</h1></div><nav id="nav"></nav><button id="thm" class="thm" type="button" onclick="toggleTheme()" aria-label="Ganti tema"></button><div class="who" id="who"></div></div></header>
+<div id="leds" aria-hidden="true"></div>
 <main id="app"><p class="mu">Memuat…</p></main>
 <a id="fab" class="fab" hidden target="_blank" rel="noopener" aria-label="Booking lewat WhatsApp"></a>
 <div id="m"><div class="sheet"><button class="x" aria-label="Tutup" onclick="dismiss()">✕</button><div id="mb"></div></div></div><div id="toast" hidden></div>
@@ -496,6 +515,16 @@ function themeUI(){const b=$('#thm'),l=isLight();if(b){b.innerHTML=l?I('<path d=
  const h=document.querySelector('.hlogo');if(h)h.src=LG(1);document.querySelectorAll('img[src^="logo"]:not(.hlogo)').forEach(i=>i.src=LG());
  const m=document.querySelector('meta[name=theme-color]');if(m)m.content=l?'#f5f6f8':'#0a0e1c'}
 function toggleTheme(){const t=isLight()?'dark':'light';document.documentElement.dataset.theme=t;try{localStorage.setItem('b4theme',t)}catch(e){}themeUI();if($('#cw'))render()}
+/* ---------- LED latar: garis & bentuk dengan warna acak, dibuat sekali per kunjungan ---------- */
+const LEDC=['#00e5ff','#ff2bd6','#8b5cf6','#39ff88','#ffb000','#2f7bff','#ff4d5e'];
+function leds(){const box=$('#leds');if(!box)return;const W=innerWidth,H=innerHeight,mob=W<720,n=mob?9:16,R=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.floor(Math.random()*a.length)];let h='';
+ for(let i=0;i<n;i++){const c=pick(LEDC),x=R(-4,96),y=R(-4,96),d=R(4,10).toFixed(1),dl=(-R(0,8)).toFixed(1),k=i%6,base=`--c:${c};--d:${d}s;--dl:${dl}s;left:${x}%;top:${y}%`;
+  if(k===0||k===3){const len=R(mob?80:120,mob?200:340),rot=pick([0,0,90,30,-30,45]),run=Math.random()<.6;h+=`<div class="led ln${run?' run':''}" style="${base};width:${len}px;transform:rotate(${rot}deg);--rd:${R(5,10).toFixed(1)}s"></div>`}
+  else if(k===1){const z=R(36,mob?80:130);h+=`<div class="led rg" style="${base};width:${z}px;height:${z}px"></div>`}
+  else if(k===2){const z=R(30,mob?60:90);h+=`<div class="led sq" style="${base};width:${z}px;height:${z}px;transform:rotate(${R(0,45).toFixed(0)}deg)"></div>`}
+  else if(k===4){const z=R(40,mob?70:110);h+=`<svg class="led tr" style="${base};width:${z}px;height:${z}px;transform:rotate(${R(-20,20).toFixed(0)}deg)" viewBox="0 0 20 20"><path d="M10 2l8 14H2z"/></svg>`}
+  else h+=`<div class="led dt" style="${base}"></div>`}
+ box.innerHTML=h}
 const NAVL={Dashboard:'Unit',Transaksi:'Transaksi',Pengeluaran:'Pengeluaran',Laporan:'Laporan',Pengaturan:'Pengaturan'};
 const empty=(m,art)=>`<div class="empty">${art||padArt('PS4')}<div>${m}</div></div>`;
 
@@ -992,7 +1021,7 @@ function subAll(){
 function names(){S.names={...S.legacy};S.users.forEach(u=>S.names[u.id]=u.name)}
 
 /* ---------- boot ---------- */
-themeUI();
+themeUI();leds();
 (async()=>{
  try{fbCfg=await (await fetch('/__/firebase/init.json')).json();firebase.initializeApp(fbCfg)}
  catch(e){$('#app').innerHTML='<div class="card">Konfigurasi Firebase tidak ditemukan. Halaman ini harus dibuka dari Firebase Hosting (alamat .web.app).</div>';return}
