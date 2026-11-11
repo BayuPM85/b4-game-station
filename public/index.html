@@ -452,6 +452,8 @@ const effRate=(u,n)=>n===3?STK().r3:n===4?STK().r4:rate(u),curRate=u=>isSw(u)?ef
 const RO=()=>(S.cfg&&S.cfg.rentout)||DEF.rentout;
 const cfg=()=>S.cfg||DEF,rate=u=>u.rate>0?u.rate:rateOf(u.type);
 // 'Xbox' (jenis lama) = Xbox Series S: tarif saling mengikuti agar unit lama tidak berubah harga.
+// Jenis lama 'Xbox' ditampilkan dan diperlakukan sebagai Xbox Series S.
+const tname=t=>t==='Xbox'?'Xbox Series S':t;
 const rateOf=t=>{const R=cfg().rates||{};return R[t]??(t==='Xbox Series S'?R.Xbox:t==='Xbox'?R['Xbox Series S']:undefined)??DEF.rates[t]??(t==='Xbox'?DEF.rates['Xbox Series S']:0)};
 const end=s=>s.start+(s.paidMin+s.bonusMin+(s.redeemMin||0)+(s.ext||[]).reduce((a,e)=>a+e.min,0))*6e4;
 // Main bebas: tiap jam penuh dihitung penuh; sisa 0–4 menit gratis, 5–34 menit setengah harga, 35–59 menit harga penuh.
@@ -927,7 +929,7 @@ function pubSnap(){return{name:cfg().name||'B4 GAME STATION',units:S.units.map(u
 let pubLast='';
 function pubSync(){if(!cur||!S.cfgReady||!S.cfg)return;const o=pubSnap(),k=JSON.stringify(o);if(k===pubLast)return;pubLast=k;
  clearTimeout(pubSync.h);pubSync.h=setTimeout(()=>db.doc('public/status').set({...o,at:Date.now()}).catch(()=>{pubLast=''}),1200)}
-function pubRender(){const e=$('#pubst');if(!e)return;setTimeout(landWatch,0);const p=S.pub;if(!p||!p.units||!p.units.length){e.innerHTML='';return}
+function pubRender(){const e=$('#pubst');if(!e)return;setTimeout(landWatch,0);const p=S.pub&&{...S.pub,units:(S.pub.units||[]).map(u=>({...u,t:tname(u.t)}))};if(!p||!p.units||!p.units.length){e.innerHTML='';return}
  const c={free:0,busy:0,maint:0},now=Date.now();p.units.forEach(u=>c[u.s]=(c[u.s]||0)+1);const types=[...new Set(p.units.map(u=>u.t))];
  e.innerHTML=`<div class="pub rv${landSeen?' in':''}"><div class="pubh"><div><span class="kick">Real-time</span><h2>Status unit sekarang</h2></div><span class="mu ${now-p.at>36e5?'stale':''}">Diperbarui ${now-p.at>864e5?dtm(p.at):hm(p.at)+' WIB'}${now-p.at>36e5?' · mungkin belum terbaru':''}</span></div>
  <div class="sum"><div class="tile"><div class="ic" style="background:#0f3a2f;color:var(--ok)">${shp('free',20)}</div><div><b>${c.free}</b><span>Unit kosong</span></div></div><div class="tile"><div class="ic" style="background:#16275a;color:var(--ac2)">${shp('play',20)}</div><div><b>${c.busy}</b><span>Unit tersewa</span></div></div>${c.maint?`<div class="tile"><div class="ic" style="background:#232a45;color:var(--mu)">${shp('maint',20)}</div><div><b>${c.maint}</b><span>Perawatan</span></div></div>`:''}</div>
@@ -1041,7 +1043,7 @@ function subAll(){
  const sub=(p,f)=>unData.push(db.collection(p).onSnapshot(s=>{f(s.docs.map(d=>({id:d.id,...d.data()})));render()},dbErr));
  unData.push(db.doc('settings/main').onSnapshot(s=>{S.cfg=s.exists?s.data():null;S.cfgReady=true;render()},dbErr));
  unData.push(db.doc('meta/legacy').onSnapshot(s=>{S.legacy=s.exists&&s.data().names||{};names();render()},()=>{}));
- sub('users',l=>{S.users=l;names()});sub('units',l=>S.units=l.sort((a,b)=>(a.ord||0)-(b.ord||0)));sub('products',l=>S.prods=l);sub('stock',l=>{S.stock={};l.forEach(x=>S.stock[x.id]=x.qty)});
+ sub('users',l=>{S.users=l;names()});sub('units',l=>S.units=l.map(u=>({...u,type:tname(u.type)})).sort((a,b)=>(a.ord||0)-(b.ord||0)));sub('products',l=>S.prods=l);sub('stock',l=>{S.stock={};l.forEach(x=>S.stock[x.id]=x.qty)});
  sub('expenses',l=>{S.exp=l});sub('members',l=>{S.members={};l.forEach(x=>S.members[x.id]=x)});sub('active',l=>{S.act={};l.forEach(x=>S.act[x.id]=x)});sub('voids',l=>{S.voids={};l.forEach(x=>S.voids[x.id]=x)});
  unData.push(db.collection('trx').orderBy('at','desc').limit(1000).onSnapshot(s=>{S.trx=s.docs.map(d=>({id:d.id,...d.data()}));render()},dbErr));
 }
