@@ -380,6 +380,22 @@ nav a.on{color:#fff;background:#8b5cf61f;border-color:#8b5cf666;box-shadow:inset
 :root[data-theme="light"] .fab{box-shadow:0 8px 20px rgb(16 24 40/.18)}
 :root[data-theme="light"] .setp{background:#fff;border-color:#e6defe}
 :root[data-theme="light"] #toast{box-shadow:0 10px 30px rgb(16 24 40/.2)}
+/* ---------- pengumuman (GTA 6) ---------- */
+.ann{position:relative;overflow:hidden;isolation:isolate;display:grid;grid-template-columns:1fr auto;gap:22px;align-items:center;padding:clamp(20px,4vw,34px);border-radius:24px;color:#fff;
+ background:linear-gradient(115deg,#1a0b2e 0%,#3b0f4f 45%,#7a1f5c 75%,#c24a3a 100%);border:1px solid #ff6fb055;box-shadow:0 20px 50px -20px #c2185b66}
+.ann::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(45% 80% at 100% 100%,#ffb34766,transparent 70%),radial-gradient(40% 70% at 0% 0%,#00e5ff2e,transparent 70%)}
+.ann::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;z-index:-1;background:linear-gradient(90deg,#00e5ff,#ff2bd6,#ffb000);opacity:.9}
+.annk{display:inline-flex;align-items:center;gap:8px;font:800 12px/1 var(--fb);letter-spacing:3px;color:#ffd1ea}
+.live{width:9px;height:9px;border-radius:50%;background:#ff3b6b;box-shadow:0 0 0 0 #ff3b6b99;animation:live 1.8s ease-out infinite}
+@keyframes live{0%{box-shadow:0 0 0 0 #ff3b6b99}100%{box-shadow:0 0 0 12px #ff3b6b00}}
+.ann h2{font:800 clamp(30px,6vw,56px)/1 var(--fd);letter-spacing:-.5px;margin:10px 0 8px;color:#fff;text-shadow:0 0 24px #ff2bd655}
+.ann p{margin:0;max-width:52ch;color:#f3dcef;font-size:16px;line-height:1.5}
+.annb{display:inline-flex;align-items:center;gap:10px;margin-top:16px;min-height:50px;padding:12px 20px;border-radius:14px;font-weight:700;color:#1a0b2e;text-decoration:none;background:#fff;transition:transform .12s,box-shadow .2s}
+.annb:hover{box-shadow:0 8px 24px #ff2bd655}.annb:active{transform:scale(.97)}.annb svg{color:#1faa59}
+.annu{display:grid;grid-template-columns:auto auto;align-items:center;gap:10px;padding:16px 20px;border-radius:20px;background:#ffffff14;border:1px solid #ffffff33;backdrop-filter:blur(6px)}
+.annu b{font:800 clamp(56px,9vw,88px)/.9 var(--fd);background:linear-gradient(180deg,#fff,#ffb3d9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.annu span{font:800 13px/1.15 var(--fb);letter-spacing:2px;color:#ffd1ea}
+@media (max-width:640px){.ann{grid-template-columns:1fr}.annu{justify-self:start;order:-1;padding:10px 16px}.annb{width:100%;justify-content:center}}
 /* ---------- LED latar (garis & bentuk acak) ---------- */
 #leds{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict}
 main{position:relative;z-index:1}
@@ -851,7 +867,7 @@ function vSet(){const c=cfg(),sc=site(),sp=sc.promo;
  <div class="card"><h3>Profil usaha &amp; struk</h3><div class="two" style="margin-top:0"><div><label for="s_n">Nama usaha</label><input id="s_n" value="${esc(c.name)}"></div><div><label for="s_t">Kontak</label><input id="s_t" value="${esc(c.tel)}"></div></div><label for="s_a">Alamat</label><input id="s_a" value="${esc(c.addr)}"><label for="s_f">Pesan di bawah struk</label><input id="s_f" value="${esc(c.foot)}">
  <div class="two" style="margin-top:0"><div><label for="s_p">Lebar kertas struk</label><select id="s_p"><option value="80" ${c.paper==='80'?'selected':''}>80 mm</option><option value="58" ${c.paper==='58'?'selected':''}>58 mm</option></select></div><div><label>Tarif main bebas</label><p class="mu" style="margin:6px 0 0">Per jam: sisa 5–34 menit dihitung setengah harga, 35–60 menit harga penuh. Di bawah 5 menit tidak dihitung.</p></div></div>
  <label for="s_l">Keluar otomatis saat tidak dipakai</label><select id="s_l">${[0,5,10,30,60].map(n=>`<option value="${n}" ${+(c.lock??10)===n?'selected':''}>${n?n+' menit':'Mati'}</option>`).join('')}</select></div>
- <div class="card setp"><h3>Halaman depan: promo, kontak &amp; lokasi</h3><p class="mu" style="margin:2px 0 6px">Tampil untuk pengunjung di halaman depan. Tanggal memakai zona Asia/Jakarta. Kosongkan tanggal kalau periode belum ditentukan; tidak ada hitung mundur.</p>
+ <div class="card setp"><h3>Halaman depan: pengumuman, promo, kontak &amp; lokasi</h3><p class="mu" style="margin:2px 0 6px">Tampil untuk pengunjung di halaman depan. Tanggal memakai zona Asia/Jakarta. Kosongkan tanggal kalau periode belum ditentukan; tidak ada hitung mundur.</p>
  <label class="check"><input type="checkbox" id="w_on" ${sp.on?'checked':''}>Tampilkan promo di halaman depan</label>
  <div class="two" style="margin-top:0"><div><label for="w_t">Judul</label><input id="w_t" value="${esc(sp.title)}"></div><div><label for="w_s">Subjudul</label><input id="w_s" value="${esc(sp.sub)}"></div></div>
  <label for="w_d">Deskripsi</label><textarea id="w_d">${esc(sp.desc)}</textarea>
@@ -862,6 +878,9 @@ function vSet(){const c=cfg(),sc=site(),sp=sc.promo;
   <p class="tot3" id="k${i}t">Total waktu bermain ${(+k.play||0)+(+k.bonus||0)} jam</p>
   <label for="k${i}x">Teks tombol</label><input id="k${i}x" value="${esc(k.btn)}"><label for="k${i}m">Pesan WhatsApp (siap kirim, tidak terkirim otomatis)</label><textarea id="k${i}m">${esc(k.msg)}</textarea></div>`).join('')}
  <label for="w_k">Ketentuan (opsional, satu per baris)</label><textarea id="w_k" placeholder="Kosongkan kalau belum ada ketentuan">${esc(sp.terms)}</textarea>
+ <div class="pkset"><h4>Pengumuman (banner paling atas)</h4><label class="check"><input type="checkbox" id="a_on" ${sc.ann.on?'checked':''}>Tampilkan pengumuman</label>
+  <div class="two" style="margin-top:0"><div><label for="a_t">Judul</label><input id="a_t" value="${esc(sc.ann.title)}"></div><div><label for="a_u">Jumlah unit (0 = sembunyikan)</label><input id="a_u" type="number" min="0" inputmode="numeric" value="${sc.ann.units}"></div></div>
+  <label for="a_d">Deskripsi</label><input id="a_d" value="${esc(sc.ann.desc)}"><div class="two" style="margin-top:0"><div><label for="a_b">Teks tombol</label><input id="a_b" value="${esc(sc.ann.btn)}"></div><div><label for="a_m">Pesan WhatsApp</label><input id="a_m" value="${esc(sc.ann.msg)}"></div></div></div>
  <label for="w_ad">Alamat</label><textarea id="w_ad" style="min-height:64px">${esc(sc.addr)}</textarea>
  <div class="two" style="margin-top:0"><div><label for="w_ig">Instagram (username)</label><input id="w_ig" value="${esc(sc.ig)}" placeholder="Belum diisi"></div><div><label for="w_tt">TikTok (username)</label><input id="w_tt" value="${esc(sc.tt)}" placeholder="@b4_gamestation"></div></div>
  <div class="two" style="margin-top:0"><div><label for="w_w">No. WhatsApp booking</label><input id="w_w" type="tel" inputmode="tel" value="${esc(sc.wa?waFmt(sc.wa):'')}" placeholder="08xxxxxxxxxx"></div><div><label for="w_u">Atau link booking lain (opsional)</label><input id="w_u" type="url" value="${esc(sc.url)}" placeholder="https://…"></div></div>
@@ -884,7 +903,7 @@ async function saveSite(){const er=$('#werr');er.textContent='';const sp=site().
  if($('#w_w').value.trim()&&wa.length<10)return er.textContent='No. WhatsApp tidak valid.';
  if(url&&!/^https:\/\//.test(url))return er.textContent='Link booking harus diawali https://';
  const pk=sp.pk.map((k,i)=>({name:$('#k'+i+'n').value.trim()||k.name,badge:$('#k'+i+'g').value.trim(),play:Math.max(1,Math.round(+$('#k'+i+'p').value||1)),bonus:Math.max(0,Math.round(+$('#k'+i+'b').value||0)),btn:$('#k'+i+'x').value.trim()||k.btn,msg:$('#k'+i+'m').value.trim()}));
- try{await db.doc('public/site').set({wa,url,addr:$('#w_ad').value.trim(),ig:handle($('#w_ig').value),tt:handle($('#w_tt').value),promo:{on:$('#w_on').checked,title:$('#w_t').value.trim(),sub:$('#w_s').value.trim(),desc:$('#w_d').value.trim(),year:y,start:st,end:en,after:$('#w_a').value,terms:$('#w_k').value.trim(),pk},at:Date.now(),by:me});toast('Halaman depan disimpan')}catch(e){dbErr(e)}}
+ try{await db.doc('public/site').set({wa,url,ann:{on:$('#a_on').checked,kick:site().ann.kick,title:$('#a_t').value.trim(),units:Math.max(0,Math.round(+$('#a_u').value||0)),desc:$('#a_d').value.trim(),btn:$('#a_b').value.trim(),msg:$('#a_m').value.trim()},addr:$('#w_ad').value.trim(),ig:handle($('#w_ig').value),tt:handle($('#w_tt').value),promo:{on:$('#w_on').checked,title:$('#w_t').value.trim(),sub:$('#w_s').value.trim(),desc:$('#w_d').value.trim(),year:y,start:st,end:en,after:$('#w_a').value,terms:$('#w_k').value.trim(),pk},at:Date.now(),by:me});toast('Halaman depan disimpan')}catch(e){dbErr(e)}}
 async function saveCfg(){try{const c=cfg(),r={};TYPES.forEach((t,i)=>r[t]=Math.max(0,+$('#r'+i).value||0));Object.keys(c.rates||{}).forEach(t=>{if(!(t in r))r[t]=c.rates[t]});const pm={};for(const k in c.promos)pm[k]={...c.promos[k],on:$('#pr_'+k).checked};
  await db.doc('settings/main').set({...c,name:$('#s_n').value,addr:$('#s_a').value,tel:$('#s_t').value,foot:$('#s_f').value,paper:$('#s_p').value,round:c.round||15,lock:+$('#s_l').value,rates:r,promos:pm,sticks:{...STK(),on:$('#sk_on').checked,r3:Math.max(0,+$('#sk3').value||STK().r3),r4:Math.max(0,+$('#sk4').value||STK().r4)},rentout:{...RO(),on:$('#ro_on').checked,opts:RO().opts.map((o,i)=>({h:o.h,price:Math.max(0,+$('#ro'+i).value||o.price)}))}});toast('Pengaturan disimpan')}catch(e){dbErr(e)}}
 function unitM(id){const u=S.units.find(x=>x.id===id)||{name:'Unit '+String(S.units.length+1).padStart(2,'0'),type:'PS4',rate:0};open(`<h3>${id?'Ubah':'Tambah'} Unit</h3><label for="un">Nama</label><input id="un" value="${esc(u.name)}"><label>Jenis konsol</label><div class="opts" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr))">${TYPES.map(t=>`<label class="opt"><input type="radio" name="ut" value="${t}" ${t===u.type?'checked':''}><span style="align-items:center;text-align:center">${padArt(t).replace('class="cart cimg"','class="cart cimg" style="width:96px;margin:0 auto 6px"')}<b style="font-size:13px">${t}</b></span></label>`).join('')}</div><label for="ur">Tarif khusus per jam (0 = ikut jenis konsol)</label><input id="ur" type="number" inputmode="numeric" value="${u.rate||0}"><label class="check" style="margin-top:14px"><input id="um" type="checkbox" ${u.maint?'checked':''}>Sedang perawatan</label><div class="foot">${id?`<button class="d" onclick="delUnit('${id}')">Hapus</button>`:`<button onclick="close()">Batal</button>`}<button class="p" onclick="saveUnit('${id||''}')">Simpan</button></div>`)}
@@ -922,13 +941,13 @@ async function firstAdmin(){const n=$('#fn').value.trim(),e=$('#fe').value.trim(
   b.set(db.doc('users/'+uid),{name:n,email:e,role:'admin',on:true});b.set(db.doc('meta/setup'),{done:true,uid,at:Date.now()});await b.commit()}catch(x){er.textContent=aErr(x);$('#lb').disabled=false}}
 function logout(){unData.forEach(f=>f());unData=[];close();auth.signOut()}
 /* ---------- halaman depan: promo, kontak, animasi ---------- */
-const DEFPK=[{name:'PAKET MAIN 2 JAM',play:2,bonus:1,badge:'',btn:'Pilih Paket 2 + 1 Jam',msg:'Halo B4 Game Station, saya tertarik promo Oktober main 2 jam bonus 1 jam, total 3 jam. Apakah tersedia?'},
- {name:'PAKET MAIN 5 JAM',play:5,bonus:3,badge:'Bonus Lebih Banyak',btn:'Pilih Paket 5 + 3 Jam',msg:'Halo B4 Game Station, saya tertarik promo Oktober main 5 jam bonus 3 jam, total 8 jam. Apakah tersedia?'}];
+const DEFPK=[{name:'PAKET MAIN 2 JAM',play:2,bonus:1,badge:'',btn:'Pilih Paket 2 + 1 Jam',msg:'Halo B4 Game Station, saya tertarik promo November main 2 jam bonus 1 jam, total 3 jam. Apakah tersedia?'},
+ {name:'PAKET MAIN 5 JAM',play:5,bonus:3,badge:'Bonus Lebih Banyak',btn:'Pilih Paket 5 + 3 Jam',msg:'Halo B4 Game Station, saya tertarik promo November main 5 jam bonus 3 jam, total 8 jam. Apakah tersedia?'}];
 // Konfigurasi halaman depan (public/site). Nomor WA bawaan = nomor booking yang sudah dipakai situs.
 const DEFADDR='Jl. Sumatra, Togogan I, Togogan, Kec. Srengat, Kabupaten Blitar, Jawa Timur 66152';
 const handle=v=>String(v||'').trim().replace(/^@/,'').replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com)\/@?/i,'').replace(/[/?#].*$/,'');
-function site(){const d=S.site||{},P=d.promo||{};return{wa:d.wa===undefined?'6281357976335':d.wa,url:d.url||'',addr:d.addr===undefined?DEFADDR:d.addr,ig:handle(d.ig),tt:d.tt===undefined?'b4_gamestation':handle(d.tt),
- promo:{on:P.on!==false,title:P.title||'PROMO BULAN OKTOBER',sub:P.sub||'Main Lebih Lama, Makin Seru!',desc:P.desc||'Nikmati bonus waktu bermain di B4 Game Station. Pilih paketmu dan ajak teman main bareng!',
+function site(){const d=S.site||{},P=d.promo||{},A=d.ann||{};return{ann:{on:A.on!==false,kick:A.kick||'ANNOUNCEMENT',title:A.title||'GTA 6 READY!',units:A.units===undefined?4:+A.units,desc:A.desc||'Main Grand Theft Auto VI sekarang di B4 Game Station.',btn:A.btn||'Booking Main GTA 6',msg:A.msg||'Halo B4 Game Station, saya mau main GTA 6. Apakah ada unit yang kosong?'},wa:d.wa===undefined?'6281357976335':d.wa,url:d.url||'',addr:d.addr===undefined?DEFADDR:d.addr,ig:handle(d.ig),tt:d.tt===undefined?'b4_gamestation':handle(d.tt),
+ promo:{on:P.on!==false,title:P.title||'PROMO BULAN NOVEMBER',sub:P.sub||'Main Lebih Lama, Makin Seru!',desc:P.desc||'Nikmati bonus waktu bermain di B4 Game Station. Pilih paketmu dan ajak teman main bareng!',
   year:P.year||'',start:P.start||'',end:P.end||'',after:P.after||'label',terms:P.terms||'',pk:(P.pk&&P.pk.length?P.pk:DEFPK)}}}
 const waNorm=v=>{let d=String(v||'').replace(/\D/g,'');if(d.startsWith('0'))d='62'+d.slice(1);return d};
 const waFmt=v=>{const d=waNorm(v).replace(/^62/,'0');return d.replace(/^(\d{4})(\d{4})(\d+)$/,'$1-$2-$3')};
@@ -937,6 +956,9 @@ function waHref(msg){const c=site();if(c.url)return c.url;if(!c.wa)return'';retu
 function promoState(p){const t=day(Date.now());if(p.start&&t<p.start)return'soon';if(p.end&&t>p.end)return'ended';return'open'}
 const tglID=d=>new Intl.DateTimeFormat('id-ID',{timeZone:'UTC',day:'numeric',month:'long',year:'numeric'}).format(new Date(d+'T00:00:00Z'));
 let landSeen=false,landObs=null;
+function annRender(){const e=$('#info');if(!e)return;const a=site().ann;if(!a.on){e.hidden=true;e.innerHTML='';return}e.hidden=false;const h=waHref(a.msg);
+ e.innerHTML=`<div class="ann rv${landSeen?' in':''}"><div class="annx"><span class="annk"><i class="live"></i>${esc(a.kick)}</span><h2>${esc(a.title)}</h2><p>${esc(a.desc)}</p>
+ ${h?`<a class="annb" href="${esc(h)}" target="_blank" rel="noopener">${IC.wa}${esc(a.btn)}</a>`:''}</div>${a.units>0?`<div class="annu" aria-label="Tersedia di ${a.units} unit"><b>${a.units}</b><span>UNIT<br>READY</span></div>`:''}</div>`;landWatch()}
 function promoRender(){const e=$('#promo');if(!e)return;const c=site(),p=c.promo,st=promoState(p);promoRender.st=st;
  const show=p.on&&!(st==='ended'&&p.after==='hide');e.hidden=!show;const nl=document.querySelector('#nav a[href="#promo"]');if(nl)nl.hidden=!show;if(!show){e.innerHTML='';return}
  const period=p.start||p.end?`${p.start?tglID(p.start):''}${p.start&&p.end?' – ':''}${p.end?(p.start?'':'s/d ')+tglID(p.end):''}`:'';
@@ -965,11 +987,11 @@ function footRender(){const e=$('#kontak');if(!e)return;const c=site(),h=waHref(
 // Tombol WA mengambang disembunyikan saat tombol booking lain terlihat, supaya tidak menutupi tombol atau konten.
 function fabWatch(){if(!('IntersectionObserver' in window))return;const vis=fabWatch.v=fabWatch.v||new Set();if(fabWatch.o)fabWatch.o.disconnect();vis.clear();
  fabWatch.o=new IntersectionObserver(es=>{es.forEach(x=>x.isIntersecting?vis.add(x.target):vis.delete(x.target));$('#fab').classList.toggle('away',vis.size>0)});
- document.querySelectorAll('.pk,.book,#kontak,#masuk .card').forEach(x=>fabWatch.o.observe(x))}
+ document.querySelectorAll('.ann,.pwrap,.book,.loc,#kontak,#masuk .card').forEach(x=>fabWatch.o.observe(x))}
 function pubHeader(){const h=waHref(),act=($('#nav a.on')||{}).getAttribute?.('href')||'#promo',show=site().promo.on;
  $('#nav').innerHTML=[['#promo','Promo'],['#status','Status Unit'],['#lokasi','Lokasi'],['#kontak','Kontak'],['#masuk','Masuk Staf']].filter(([k])=>k!=='#promo'||show).map(([k,l])=>`<a href="${k}"${k===act?' class="on" aria-current="true"':''}>${l}</a>`).join('');
  $('#who').innerHTML=h?`<a class="bkh" href="${esc(h)}" target="_blank" rel="noopener">${IC.wa}<span>Booking</span></a>`:''}
-function landInit(){pubHeader();promoRender();pubRender();locRender();footRender();
+function landInit(){pubHeader();annRender();promoRender();pubRender();locRender();footRender();
  const red=matchMedia('(prefers-reduced-motion: reduce)').matches;document.body.classList.toggle('anim',!red&&'IntersectionObserver' in window);
  if(red)landSeen=true;
  // penanda navigasi aktif
@@ -985,7 +1007,7 @@ const hero=()=>`<img class="plogo" src="${LG()}" alt="B4 Game Station">`;
 function vLogin(){if($('#le')||$('#fn'))return;const a=$('#app');
  if(!S.setupKnown){a.innerHTML='<p class="mu">Memuat…</p>';return}
  if(!S.setup){a.innerHTML=`<div class="login">${hero()}<h2>Selamat datang!</h2><p>Buat akun Admin untuk pemilik. Kasir ditambahkan nanti di Pengaturan.</p><div class="card"><label for="fn" style="margin-top:0">Nama</label><input id="fn" placeholder="Nama pemilik" autocomplete="name"><label for="fe">Email</label><input id="fe" type="email" placeholder="nama@gmail.com" autocomplete="email"><label for="f1">Kata sandi (min. 6 karakter)</label><input id="f1" type="password" autocomplete="new-password"><label for="f2">Ulangi kata sandi</label><input id="f2" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')firstAdmin()"><p class="err" id="lerr" role="alert"></p><button class="p" id="lb" style="width:100%;margin-top:12px" onclick="firstAdmin()">Buat akun Admin</button></div></div>`;return}
- a.innerHTML=`<div class="land"><section id="promo" class="psec" aria-label="Promo"></section><section id="status" class="psec" aria-label="Status unit"><div id="pubst"></div></section><section id="lokasi" class="psec" aria-label="Lokasi dan media sosial"></section><section id="masuk" class="psec" aria-label="Masuk staf"><div class="divider">Khusus staf</div><div class="login" style="margin-top:10px"><h2>Masuk</h2><p>Masuk dengan email dan kata sandi akun staf.</p><div class="card"><label for="le" style="margin-top:0">Email</label><input id="le" type="email" autocomplete="username" placeholder="nama@gmail.com"><label for="lp">Kata sandi</label><input id="lp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"><p class="err" id="lerr" role="alert"></p><button class="p" id="lb" style="width:100%;margin-top:12px" onclick="login()">Masuk</button><div style="text-align:center;margin-top:8px"><button class="link" onclick="resetPw()">Lupa kata sandi?</button></div></div></div></section><footer id="kontak" class="psec"></footer></div>`;landInit()}
+ a.innerHTML=`<div class="land"><section id="info" class="psec" aria-label="Pengumuman"></section><section id="promo" class="psec" aria-label="Promo"></section><section id="status" class="psec" aria-label="Status unit"><div id="pubst"></div></section><section id="lokasi" class="psec" aria-label="Lokasi dan media sosial"></section><section id="masuk" class="psec" aria-label="Masuk staf"><div class="divider">Khusus staf</div><div class="login" style="margin-top:10px"><h2>Masuk</h2><p>Masuk dengan email dan kata sandi akun staf.</p><div class="card"><label for="le" style="margin-top:0">Email</label><input id="le" type="email" autocomplete="username" placeholder="nama@gmail.com"><label for="lp">Kata sandi</label><input id="lp" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"><p class="err" id="lerr" role="alert"></p><button class="p" id="lb" style="width:100%;margin-top:12px" onclick="login()">Masuk</button><div style="text-align:center;margin-top:8px"><button class="link" onclick="resetPw()">Lupa kata sandi?</button></div></div></div></section><footer id="kontak" class="psec"></footer></div>`;landInit()}
 function vNoAccess(){const a=$('#app');if(!S.meReady){a.innerHTML='<p class="mu">Memeriksa akun…</p>';return}
  a.innerHTML=`<div class="login">${hero()}<h2>Akun belum terdaftar</h2><p>${esc(authUser.email)} belum terdaftar sebagai staf aktif. Minta Admin menambahkan email ini di Pengaturan → Akun staf.</p><button onclick="logout()">Keluar</button></div>`}
 const nAdm=ex=>S.users.filter(x=>x.role==='admin'&&x.on!==false&&x.id!==ex).length;
@@ -1027,7 +1049,7 @@ themeUI();leds();
  catch(e){$('#app').innerHTML='<div class="card">Konfigurasi Firebase tidak ditemukan. Halaman ini harus dibuka dari Firebase Hosting (alamat .web.app).</div>';return}
  auth=firebase.auth();db=firebase.firestore();
  db.doc('public/status').onSnapshot(s=>{S.pub=s.exists?s.data():null;pubRender()},()=>{});
- db.doc('public/site').onSnapshot(s=>{S.site=s.exists?s.data():null;if($('#promo')){pubHeader();promoRender();locRender();footRender();pubRender()}},()=>{});
+ db.doc('public/site').onSnapshot(s=>{S.site=s.exists?s.data():null;if($('#promo')){pubHeader();annRender();promoRender();locRender();footRender();pubRender()}},()=>{});
  db.doc('meta/setup').onSnapshot(s=>{S.setup=s.exists;S.setupKnown=true;if(!authUser)render()},()=>{S.setupKnown=true;S.setup=true;render()});
  auth.onAuthStateChanged(u=>{authUser=u;if(unMe){unMe();unMe=null}unData.forEach(f=>f());unData=[];cur=null;admin=false;me='';S.meReady=false;S.cfgReady=false;tab='Dashboard';
   if(!u){render();return}
