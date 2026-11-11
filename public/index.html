@@ -334,7 +334,7 @@ const day=t=>new Intl.DateTimeFormat('sv-SE',{timeZone:TZ}).format(t);
 const wkend=t=>/Sat|Sun/.test(new Intl.DateTimeFormat('en-US',{timeZone:TZ,weekday:'short'}).format(t));
 const clock=ms=>{const s=Math.max(0,Math.floor(ms/1000));return[s/3600|0,(s/60|0)%60,s%60].map(x=>String(x).padStart(2,'0')).join(':')};
 const DEF={name:'B4 GAME STATION',addr:'',tel:'',foot:'Terima kasih, selamat bermain!',paper:'80',round:15,lock:10,
-rates:{PS5:15000,PS4:8000,PS3:5000,'Nintendo Switch':10000,Xbox:10000},
+rates:{PS5:15000,PS4:8000,PS3:5000,'Nintendo Switch':10000,Xbox:10000,'Xbox Series X':15000},
 sticks:{on:true,type:'Nintendo Switch',r3:13000,r4:15000},
 rentout:{on:true,type:'PS3',opts:[{h:24,price:50000},{h:12,price:30000}]},
 promos:{p2:{name:'Main 2 jam bonus 1 jam',pay:2,bonus:1,on:true},p5:{name:'Main 5 jam bonus 3 jam',pay:5,bonus:3,on:true}}};
@@ -349,7 +349,7 @@ const STK=()=>(S.cfg&&S.cfg.sticks)||DEF.sticks,isSw=u=>STK().on&&u&&u.type===ST
 const skVal=()=>+((document.querySelector('input[name=sk]:checked')||{}).value||2);
 const effRate=(u,n)=>n===3?STK().r3:n===4?STK().r4:rate(u),curRate=u=>isSw(u)?effRate(u,skVal()):rate(u);
 const RO=()=>(S.cfg&&S.cfg.rentout)||DEF.rentout;
-const cfg=()=>S.cfg||DEF,rate=u=>u.rate>0?u.rate:(cfg().rates[u.type]||0);
+const cfg=()=>S.cfg||DEF,rate=u=>u.rate>0?u.rate:(cfg().rates[u.type]??DEF.rates[u.type]??0);
 const end=s=>s.start+(s.paidMin+s.bonusMin+(s.redeemMin||0)+(s.ext||[]).reduce((a,e)=>a+e.min,0))*6e4;
 // Main bebas: tiap jam penuh dihitung penuh; sisa 0–4 menit gratis, 5–34 menit setengah harga, 35–59 menit harga penuh.
 const bebasBill=min=>{const h=Math.floor(min/60),r=min%60;return h*60+(r<5?0:r<35?30:60)};
@@ -366,8 +366,33 @@ const aErr=e=>AE[e&&e.code]||(e&&e.message)||String(e);
 function dl(name,data,type){const b=new Blob([data],{type}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
 
 /* ---------- gambar ---------- */
-const tkey=t=>({PS5:'ps5',PS4:'ps4',PS3:'ps3','Nintendo Switch':'ns',Xbox:'xb'})[t]||'ps4';
-function padArt(t){
+const tkey=t=>({PS5:'ps5',PS4:'ps4',PS3:'ps3','Nintendo Switch':'ns',Xbox:'xb','Xbox Series X':'xb'})[t]||'ps4';
+// Ikon mesin konsol (tampak depan), viewBox 160x100.
+function padArt(t){if(/switch/i.test(t))return padArtOld(t);
+ const sh=`<ellipse cx="80" cy="93" rx="58" ry="4" fill="#000" opacity=".35"/>`,W=(c)=>`<svg class="cart" viewBox="0 0 160 100" aria-hidden="true">${sh}${c}</svg>`;
+ if(t==='PS5')return W(`<ellipse cx="80" cy="92" rx="24" ry="3.5" fill="#0b0d14"/>
+  <rect x="70" y="9" width="20" height="82" rx="4" fill="#161923"/><rect x="72" y="11" width="16" height="78" rx="3" fill="#1f2331"/>
+  <path d="M70 11C57 13 50 21 50 32l3 53c0 3.5 3 6 6.5 6H70z" fill="#f2f4f9"/><path d="M90 11c13 2 20 10 20 21l-3 53c0 3.5-3 6-6.5 6H90z" fill="#f2f4f9"/>
+  <path d="M70 11C60 13 55 19 54 27" stroke="#fff" stroke-width="2" fill="none" opacity=".9"/><path d="M57 34l2 50" stroke="#d5d9e4" stroke-width="2"/>
+  <path d="M70.5 14v74M89.5 14v74" stroke="#4f8cff" stroke-width="1.6" opacity=".9"/><rect x="77" y="16" width="6" height="2" rx="1" fill="#8fa2c7"/>`);
+ if(t==='PS4')return W(`<path d="M30 30h104l-12 46H18z" fill="#151824"/><path d="M30 30h104l-5.6 21.5H24.4z" fill="#232838"/>
+  <path d="M31 31.5h101.5" stroke="#3a4158" stroke-width="2"/><path d="M24.4 52.5h104" stroke="#3d7bff" stroke-width="2.4"/>
+  <path d="M24.4 52.5h104" stroke="#8fb4ff" stroke-width="1" opacity=".8"/><path d="M60 41h40" stroke="#0e1018" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M120 62h6" stroke="#2c3348" stroke-width="2" stroke-linecap="round"/><path d="M128 34l-4 16" stroke="#3a4158" stroke-width="1.5"/>`);
+ if(t==='PS3')return W(`<path d="M18 74V56c0-14 26-24 62-24s62 10 62 24v18z" fill="#14161e"/><path d="M24 52c4-9 26-16 56-16s52 7 56 16" stroke="#3a3f52" stroke-width="2.5" fill="none"/>
+  <rect x="18" y="72" width="124" height="7" rx="2" fill="#9aa1b5"/><rect x="18" y="72" width="124" height="2" fill="#cdd2df"/>
+  <path d="M44 61h72" stroke="#050608" stroke-width="2.4" stroke-linecap="round"/><text x="80" y="54" text-anchor="middle" font-family="Chakra Petch,sans-serif" font-weight="700" font-size="7" fill="#5b6178">PS3</text>
+  <circle cx="128" cy="62" r="2" fill="#2fd27a"/>`);
+ if(t==='Xbox Series X')return W(`<rect x="54" y="8" width="52" height="84" rx="4" fill="#15171c"/><rect x="100" y="8" width="6" height="84" rx="2" fill="#0d0f12"/>
+  <path d="M57 11h40" stroke="#2a2e36" stroke-width="2"/>${[0,1,2,3].map(i=>`<circle cx="${62+i*9}" cy="15" r="2.3" fill="#3ec76a" opacity="${.35+i*.15}"/>`).join('')}
+  <circle cx="64" cy="27" r="3.4" fill="none" stroke="#e9eef5" stroke-width="1.4"/><path d="M62.3 25.3l3.4 3.4m0-3.4l-3.4 3.4" stroke="#e9eef5" stroke-width="1.1" stroke-linecap="round"/>
+  <rect x="60" y="36" width="2.4" height="30" rx="1.2" fill="#2b2f37"/><rect x="61" y="80" width="6" height="2.4" rx="1" fill="#2b2f37"/>`);
+ if(/xbox/i.test(t))return W(`<rect x="24" y="30" width="112" height="50" rx="5" fill="#eef0f4"/><rect x="24" y="30" width="112" height="6" rx="3" fill="#ffffff"/>
+  <circle cx="110" cy="55" r="19" fill="#191b21"/>${[[-8,-8],[0,-10],[8,-8],[-10,0],[0,0],[10,0],[-8,8],[0,10],[8,8]].map(([dx,dy])=>`<circle cx="${110+dx}" cy="${55+dy}" r="1.6" fill="#33363f"/>`).join('')}
+  <circle cx="36" cy="42" r="3.4" fill="none" stroke="#8b919e" stroke-width="1.3"/><path d="M34.3 40.3l3.4 3.4m0-3.4l-3.4 3.4" stroke="#8b919e" stroke-width="1" stroke-linecap="round"/>
+  <rect x="33" y="68" width="7" height="2.6" rx="1.2" fill="#b8bdc8"/>`);
+ return padArt('PS4')}
+function padArtOld(t){
  if(/switch/i.test(t))return `<svg class="cart" viewBox="0 0 160 100" aria-hidden="true"><rect x="40" y="20" width="80" height="60" rx="4" fill="#1b2030"/><rect x="45" y="25" width="70" height="50" rx="2" fill="#27305a"/><path d="M50 70l16-20 10 12 9-9 20 17z" fill="#3d7bff" opacity=".55"/><circle cx="98" cy="36" r="5" fill="#ffd36e" opacity=".8"/><path d="M40 20h-9a13 13 0 0 0-13 13v34a13 13 0 0 0 13 13h9z" fill="#10bfe8"/><path d="M120 20h9a13 13 0 0 1 13 13v34a13 13 0 0 1-13 13h-9z" fill="#ff5160"/><circle cx="29" cy="37" r="5.5" fill="#1b2030"/><circle cx="131" cy="62" r="5.5" fill="#1b2030"/><g fill="#1b2030"><circle cx="29" cy="55" r="2.3"/><circle cx="29" cy="66" r="2.3"/><circle cx="23.5" cy="60.5" r="2.3"/><circle cx="34.5" cy="60.5" r="2.3"/><circle cx="131" cy="31" r="2.3"/><circle cx="131" cy="42" r="2.3"/><circle cx="125.5" cy="36.5" r="2.3"/><circle cx="136.5" cy="36.5" r="2.3"/></g></svg>`;
  const P={PS5:['#1b2030','#f1f3fa','#2a3148','#11141f',1],PS4:['#1f2639','#2e3652','#141a2a','#3a425e',1],PS3:['#151a28','#151a28','#0b0e18','#2c3345',1],Xbox:['#262d37','#262d37','#171c24','#39424f',0]}[t]||['#1f2639','#2e3652','#141a2a','#3a425e',1];
  const [b,pad,dp,st,ps]=P,bx=118,by=42;
@@ -739,7 +764,7 @@ function vSet(){const c=cfg(),sc=site(),sp=sc.promo;
  <p class="mu" style="margin:6px 0 0">Tombol paket membuka WhatsApp dengan pesan di atas. Kalau link booking diisi, tombol membuka link itu. Kalau keduanya kosong, tombol dinonaktifkan.</p>
  <p class="err" id="werr" role="alert"></p><button class="p" style="margin-top:10px" onclick="saveSite()">Simpan halaman depan</button></div>
  <div class="card"><div class="hrow"><h3>Produk &amp; stok</h3><button onclick="tab='Produk';render()">${IC.Produk}Kelola produk</button></div><p class="mu" style="margin:0">${S.prods.length} produk${low().length?' · '+low().length+' stok menipis':''}. Menu Produk dipindah ke sini; penjualan produk tetap dari halaman Unit.</p></div>
- <div class="card"><h3>Tarif per jam</h3><div class="rgrid" style="margin-top:10px">${TYPES.map((t,i)=>`<div class="ri">${padArt(t)}<div><label for="r${i}">${t}</label><input id="r${i}" type="number" inputmode="numeric" value="${c.rates[t]}"></div></div>`).join('')}</div></div>
+ <div class="card"><h3>Tarif per jam</h3><div class="rgrid" style="margin-top:10px">${TYPES.map((t,i)=>`<div class="ri">${padArt(t)}<div><label for="r${i}">${t}</label><input id="r${i}" type="number" inputmode="numeric" value="${c.rates[t]??DEF.rates[t]}"></div></div>`).join('')}</div></div>
  <div class="card"><h3>Tarif stik ${esc(STK().type)}</h3><p class="mu" style="margin:2px 0 4px">2 stik memakai tarif normal ${esc(STK().type)} di atas. Tarif ini dipakai untuk paket jam, promo, main bebas, dan tambah waktu.</p><label class="check"><input type="checkbox" id="sk_on" ${STK().on?'checked':''}>Aktifkan pilihan jumlah stik</label><div class="rgrid" style="margin-top:8px"><div class="ri"><div><label for="sk3">3 stik (Rp/jam)</label><input id="sk3" type="number" inputmode="numeric" value="${STK().r3}"></div></div><div class="ri"><div><label for="sk4">4 stik (Rp/jam)</label><input id="sk4" type="number" inputmode="numeric" value="${STK().r4}"></div></div></div></div>
  <div class="card"><h3>Rent Out (sewa bawa pulang)</h3><p class="mu" style="margin:2px 0 4px">Hanya muncul untuk unit ${esc(RO().type)}. Tanpa bonus promo dan tanpa bonus simpanan. Wajib nama dan No. HP penyewa.</p><label class="check"><input type="checkbox" id="ro_on" ${RO().on?'checked':''}>Aktifkan Rent Out</label><div class="rgrid" style="margin-top:8px">${RO().opts.map((o,i)=>`<div class="ri"><div><label for="ro${i}">Rent Out ${o.h} jam (Rp)</label><input id="ro${i}" type="number" inputmode="numeric" value="${o.price}"></div></div>`).join('')}</div></div>
  <div class="card"><h3>Promo</h3><p class="mu" style="margin:2px 0 4px">Berlaku setiap hari. Senin–Jumat bonus bisa disimpan ke saldo pelanggan (berlaku ${BDAYS} hari kerja); Sabtu–Minggu bonus harus langsung dipakai, sisanya hangus. Bonus dari hari lain hanya bisa diambil dengan paket minimal 1 jam berbayar, atau di hari yang sama tanpa bayar jam. Sabtu–Minggu bonus simpanan tidak bisa diambil.</p>${Object.entries(c.promos).map(([k,p])=>`<label class="check"><input type="checkbox" id="pr_${k}" ${p.on?'checked':''}>${esc(p.name)}</label>`).join('')}</div>
@@ -756,7 +781,7 @@ async function saveSite(){const er=$('#werr');er.textContent='';const sp=site().
  if(url&&!/^https:\/\//.test(url))return er.textContent='Link booking harus diawali https://';
  const pk=sp.pk.map((k,i)=>({name:$('#k'+i+'n').value.trim()||k.name,badge:$('#k'+i+'g').value.trim(),play:Math.max(1,Math.round(+$('#k'+i+'p').value||1)),bonus:Math.max(0,Math.round(+$('#k'+i+'b').value||0)),btn:$('#k'+i+'x').value.trim()||k.btn,msg:$('#k'+i+'m').value.trim()}));
  try{await db.doc('public/site').set({wa,url,addr:$('#w_ad').value.trim(),ig:handle($('#w_ig').value),tt:handle($('#w_tt').value),promo:{on:$('#w_on').checked,title:$('#w_t').value.trim(),sub:$('#w_s').value.trim(),desc:$('#w_d').value.trim(),year:y,start:st,end:en,after:$('#w_a').value,terms:$('#w_k').value.trim(),pk},at:Date.now(),by:me});toast('Halaman depan disimpan')}catch(e){dbErr(e)}}
-async function saveCfg(){try{const c=cfg(),r={};TYPES.forEach((t,i)=>r[t]=Math.max(0,+$('#r'+i).value||0));const pm={};for(const k in c.promos)pm[k]={...c.promos[k],on:$('#pr_'+k).checked};
+async function saveCfg(){try{const c=cfg(),r={};TYPES.forEach((t,i)=>r[t]=Math.max(0,+$('#r'+i).value||0));Object.keys(c.rates||{}).forEach(t=>{if(!(t in r))r[t]=c.rates[t]});const pm={};for(const k in c.promos)pm[k]={...c.promos[k],on:$('#pr_'+k).checked};
  await db.doc('settings/main').set({...c,name:$('#s_n').value,addr:$('#s_a').value,tel:$('#s_t').value,foot:$('#s_f').value,paper:$('#s_p').value,round:c.round||15,lock:+$('#s_l').value,rates:r,promos:pm,sticks:{...STK(),on:$('#sk_on').checked,r3:Math.max(0,+$('#sk3').value||STK().r3),r4:Math.max(0,+$('#sk4').value||STK().r4)},rentout:{...RO(),on:$('#ro_on').checked,opts:RO().opts.map((o,i)=>({h:o.h,price:Math.max(0,+$('#ro'+i).value||o.price)}))}});toast('Pengaturan disimpan')}catch(e){dbErr(e)}}
 function unitM(id){const u=S.units.find(x=>x.id===id)||{name:'Unit '+String(S.units.length+1).padStart(2,'0'),type:'PS4',rate:0};open(`<h3>${id?'Ubah':'Tambah'} Unit</h3><label for="un">Nama</label><input id="un" value="${esc(u.name)}"><label>Jenis konsol</label><div class="opts" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr))">${TYPES.map(t=>`<label class="opt"><input type="radio" name="ut" value="${t}" ${t===u.type?'checked':''}><span style="align-items:center;text-align:center">${padArt(t).replace('class="cart"','class="cart" style="width:80px"')}<b style="font-size:13px">${t}</b></span></label>`).join('')}</div><label for="ur">Tarif khusus per jam (0 = ikut jenis konsol)</label><input id="ur" type="number" inputmode="numeric" value="${u.rate||0}"><label class="check" style="margin-top:14px"><input id="um" type="checkbox" ${u.maint?'checked':''}>Sedang perawatan</label><div class="foot">${id?`<button class="d" onclick="delUnit('${id}')">Hapus</button>`:`<button onclick="close()">Batal</button>`}<button class="p" onclick="saveUnit('${id||''}')">Simpan</button></div>`)}
 async function saveUnit(id){try{id=id||'u'+Date.now();await db.doc('units/'+id).set({name:$('#un').value.trim()||id,type:(document.querySelector('input[name=ut]:checked')||{}).value||'PS4',rate:Math.max(0,+$('#ur').value||0),maint:$('#um').checked,ord:S.units.find(x=>x.id===id)?.ord??Date.now()});close();toast('Unit disimpan')}catch(e){dbErr(e)}}
